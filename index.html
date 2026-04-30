@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrenamiento Gym · Ciclista</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -428,6 +429,15 @@
     updateProgress();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+</script>
+<canvas id="ic" width="512" height="512" style="display:none"></canvas>
+<script>
+  var c=document.getElementById('ic'),x=c.getContext('2d');
+  x.fillStyle='#0f0f0f';x.fillRect(0,0,512,512);
+  x.font='320px serif';x.textAlign='center';x.textBaseline='middle';
+  x.fillText('🚴',256,256);
+  var a=document.createElement('a');
+  a.href=c.toDataURL();a.download='icon.png';
 </script>
 </body>
 </html>
