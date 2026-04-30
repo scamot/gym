@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrenamiento Gym · Ciclista</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #c8f060;
+    --accent-dim: rgba(200,240,96,0.12);
+    --text: #f0f0f0;
+    --muted: #888;
+    --done-bg: #1e1e1e;
+    --done-text: #444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+  }
+  header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    min-width: 36px;
+    text-align: right;
+  }
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .reset-btn:active { opacity: 0.6; }
+
+  .block {
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .block-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 12px;
+  }
+  .block-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+  .tag-warm  { background: rgba(250,238,218,0.1); color: #FAEEDA; }
+  .tag-hiit  { background: rgba(252,235,235,0.1); color: #F7C1C1; }
+  .tag-legs  { background: rgba(230,241,251,0.1); color: #B5D4F4; }
+  .tag-upper { background: rgba(230,241,251,0.1); color: #B5D4F4; }
+  .tag-core  { background: rgba(225,245,238,0.1); color: #9FE1CB; }
+
+  .block-time {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .exercises { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .exercise {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .exercise:active { opacity: 0.7; }
+  .exercise.done {
+    background: var(--done-bg);
+    border-color: transparent;
+    opacity: 0.45;
+  }
+  .exercise.done .ex-name { color: var(--done-text); text-decoration: line-through; }
+  .exercise.done .ex-detail, .exercise.done .ex-note { color: #333; }
+  .exercise.done .ex-prescription { color: #333; }
+
+  .check {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .exercise.done .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-icon {
+    display: none;
+    width: 10px;
+    height: 10px;
+  }
+  .exercise.done .check-icon { display: block; }
+  .check-icon::before {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-4.5' stroke='%230f0f0f' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+
+  .ex-body { flex: 1; min-width: 0; }
+  .ex-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .ex-detail { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .ex-note { font-size: 11px; color: #666; margin-top: 3px; font-style: italic; line-height: 1.4; }
+  .ex-prescription {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .tip {
+    margin: 4px 20px 12px;
+    padding: 10px 12px;
+    background: var(--accent-dim);
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  .completed-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+  }
+  .completed-screen.visible { display: flex; }
+  .big-check {
+    width: 64px; height: 64px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #0f0f0f;
+  }
+  .completed-screen h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .completed-screen p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>Entrenamiento Gym · Ciclista</h1>
+      <div class="subtitle">Life Fitness · ~60 min</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">RESET</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0/9</div>
+  </div>
+</header>
+
+<div id="mainContent">
+
+  <!-- BLOQUE 1 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-warm">Calentamiento</span>
+      <span class="block-time">8 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Bicicleta estática</div>
+          <div class="ex-detail">Resistencia baja-moderada, cadencia libre</div>
+          <div class="ex-note">Empieza suave, sube el ritmo progresivamente</div>
+        </div>
+        <div class="ex-prescription">5 min</div>
+      </div>
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Movilidad dinámica</div>
+          <div class="ex-detail">Círculos de cadera · sentadilla profunda · rotación torácica</div>
+        </div>
+        <div class="ex-prescription">3 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-hiit">HIIT</span>
+      <span class="block-time">15 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Bicicleta — intervalos</div>
+          <div class="ex-detail">20 seg máximo (resist. 14-16) + 40 seg recuperación (resist. 5-6)</div>
+          <div class="ex-note">10 rondas · el bloque más importante</div>
+        </div>
+        <div class="ex-prescription">10 rondas</div>
+      </div>
+    </div>
+    <div class="tip">HIIT en bici: mejora VO₂máx, potencia anaeróbica y quema grasa post-ejercicio (EPOC).</div>
+  </div>
+
+  <!-- BLOQUE 3 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-legs">Tren inferior</span>
+      <span class="block-time">22 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Prensa de piernas</div>
+          <div class="ex-detail">Pies a anchura de caderas · recorrido completo</div>
+          <div class="ex-note">Simula extensión de cadera del pedaleo</div>
+        </div>
+        <div class="ex-prescription">4 × 10</div>
+      </div>
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Extensión de cuádriceps</div>
+          <div class="ex-detail">Movimiento controlado · no bloquees la rodilla arriba</div>
+          <div class="ex-note">Fase de empuje del pedaleo</div>
+        </div>
+        <div class="ex-prescription">3 × 12</div>
+      </div>
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Curl femoral tumbado</div>
+          <div class="ex-detail">Bajada lenta 3 seg · subida explosiva</div>
+          <div class="ex-note">Equilibra cuád/isquio · reduce riesgo lesión</div>
+        </div>
+        <div class="ex-prescription">3 × 12</div>
+      </div>
+    </div>
+    <div class="tip">Descansa 60-75 seg entre series. Mantiene la intensidad y el estímulo metabólico.</div>
+  </div>
+
+  <!-- BLOQUE 4 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-upper">Tren superior</span>
+      <span class="block-time">12 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Remo en polea baja</div>
+          <div class="ex-detail">Espalda recta · codos pegados al cuerpo</div>
+          <div class="ex-note">Aguanta horas en posición aerodinámica</div>
+        </div>
+        <div class="ex-prescription">3 × 12</div>
+      </div>
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Press de hombros en máquina</div>
+          <div class="ex-detail">Agarre neutro si disponible</div>
+          <div class="ex-note">Estabilidad en el manillar</div>
+        </div>
+        <div class="ex-prescription">3 × 12</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 5 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-core">Core + vuelta a la calma</span>
+      <span class="block-time">8 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Plancha frontal</div>
+          <div class="ex-detail">Cuerpo en línea recta · respiración continua</div>
+        </div>
+        <div class="ex-prescription">3 × 40 seg</div>
+      </div>
+      <div class="exercise" onclick="toggle(this)">
+        <div class="check"><span class="check-icon"></span></div>
+        <div class="ex-body">
+          <div class="ex-name">Estiramiento final</div>
+          <div class="ex-detail">Cuád · isquios · cadera · lumbar · 30 seg cada uno</div>
+        </div>
+        <div class="ex-prescription">4 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETADO -->
+  <div class="completed-screen" id="completedScreen">
+    <div class="big-check">✓</div>
+    <h2>Sesión completada</h2>
+    <p>Buen trabajo. Recuerda hidratarte<br>y come proteína en los próximos 30-60 min.</p>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL = 9;
+
+  function toggle(el) {
+    el.classList.toggle('done');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const done = document.querySelectorAll('.exercise.done').length;
+    const pct = Math.round((done / TOTAL) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = done + '/' + TOTAL;
+    if (done === TOTAL) {
+      setTimeout(() => {
+        document.getElementById('completedScreen').classList.add('visible');
+        document.getElementById('completedScreen').scrollIntoView({ behavior: 'smooth' });
+      }, 400);
+    } else {
+      document.getElementById('completedScreen').classList.remove('visible');
+    }
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.exercise.done').forEach(el => el.classList.remove('done'));
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
