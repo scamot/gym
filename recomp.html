@@ -146,11 +146,39 @@
   .ex-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
   .ex-detail { font-size: 12px; color: var(--muted); line-height: 1.4; }
   .ex-note { font-size: 11px; color: #666; margin-top: 3px; font-style: italic; line-height: 1.4; }
+
+  .ex-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
   .ex-prescription {
     font-family: 'DM Mono', monospace;
     font-size: 13px; font-weight: 500;
-    color: var(--accent); white-space: nowrap; margin-top: 2px;
+    color: var(--accent); white-space: nowrap;
   }
+
+  .info-btn {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    background: none;
+  }
+  .info-btn:active { opacity: 0.6; }
+  .info-btn.open { border-color: var(--accent); color: var(--accent); }
+  .exercise.done .info-btn { border-color: #333; color: #333; }
+
+  .info-panel {
+    display: none;
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    font-size: 12px; color: #b8b8b8; line-height: 1.6;
+  }
+  .info-panel.open { display: block; }
+  .info-panel strong { color: var(--accent); font-weight: 500; }
 
   /* Weight row */
   .weight-row {
@@ -214,7 +242,7 @@
   <div class="header-top">
     <div>
       <h1>Entrenamiento Gym · Recomposición</h1>
-      <div class="subtitle">Life Fitness · ~60 min</div>
+      <div class="subtitle">Life Fitness · ~60 min · toca ⓘ para instrucciones</div>
     </div>
     <button class="reset-btn" onclick="resetAll()">RESET</button>
   </div>
@@ -240,7 +268,13 @@
             <div class="ex-name">Cardio suave</div>
             <div class="ex-detail">Bici o elíptica · sube el pulso de forma gradual</div>
           </div>
-          <div class="ex-prescription">5 min</div>
+          <div class="ex-right">
+            <div class="ex-prescription">5 min</div>
+            <button class="info-btn" id="btn_ex1" onclick="event.stopPropagation(); toggleInfo('ex1')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex1">
+          Bici estática o elíptica a ritmo cómodo — deberías poder mantener una conversación sin ahogarte. El objetivo es subir la temperatura corporal, no cansarte antes de empezar.
         </div>
       </div>
       <div class="exercise" id="ex2">
@@ -250,7 +284,15 @@
             <div class="ex-name">Movilidad dinámica</div>
             <div class="ex-detail">Círculos de cadera y hombro · sentadilla profunda</div>
           </div>
-          <div class="ex-prescription">2 min</div>
+          <div class="ex-right">
+            <div class="ex-prescription">2 min</div>
+            <button class="info-btn" id="btn_ex2" onclick="event.stopPropagation(); toggleInfo('ex2')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex2">
+          <strong>Círculos de cadera:</strong> de pie, manos en la cintura, 10 círculos amplios hacia cada lado.<br>
+          <strong>Sentadilla profunda sin peso:</strong> baja lo máximo posible sin despegar los talones, 8-10 reps.<br>
+          <strong>Rotación de hombros:</strong> brazos extendidos, círculos grandes adelante y atrás.
         </div>
       </div>
     </div>
@@ -271,7 +313,14 @@
             <div class="ex-detail">Recorrido completo · controla la bajada</div>
             <div class="ex-note">Superserie con Chest Press · ronda 1</div>
           </div>
-          <div class="ex-prescription">4 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">4 × 8-12</div>
+            <button class="info-btn" id="btn_ex3" onclick="event.stopPropagation(); toggleInfo('ex3')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex3">
+          Máquina inclinada: te sientas o te colocas de espaldas contra el respaldo acolchado, con los pies apoyados en una plataforma a la anchura de las caderas. Baja controlando el peso hasta que las rodillas formen casi 90°, sin despegar los talones, y empuja sin bloquear la rodilla del todo arriba.<br>
+          <strong>Peso inicial orientativo: 40-60 kg.</strong> Empieza bajo y sube si las primeras 10 reps te resultan fáciles.
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -287,7 +336,14 @@
             <div class="ex-detail">Escápulas retraídas · no bloquees el codo del todo</div>
             <div class="ex-note">Superserie con Leg Press · descansa 60-90s tras la pareja</div>
           </div>
-          <div class="ex-prescription">4 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">4 × 8-12</div>
+            <button class="info-btn" id="btn_ex4" onclick="event.stopPropagation(); toggleInfo('ex4')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex4">
+          Te sientas con la espalda pegada al respaldo y agarras las asas a la altura del pecho. Empujas hacia adelante hasta casi extender los codos (sin bloquearlos) y vuelves controlando la bajada.<br>
+          <strong>Peso inicial: 15-25 kg por lado</strong> (o el equivalente en la pila de la máquina).
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -303,7 +359,14 @@
             <div class="ex-detail">Tira con la espalda, no con los brazos</div>
             <div class="ex-note">Superserie con Curl femoral · ronda 2</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex5" onclick="event.stopPropagation(); toggleInfo('ex5')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex5">
+          Sentado, con los muslos sujetos bajo el respaldo. Agarra la barra ancha, algo más abierto que tus hombros. Tira hacia abajo llevando la barra a la parte superior del pecho, sacando pecho y llevando los codos hacia abajo y atrás — evita balancearte hacia atrás.<br>
+          <strong>Peso inicial: 20-30 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -319,7 +382,14 @@
             <div class="ex-detail">Bajada lenta 3 seg · subida controlada</div>
             <div class="ex-note">Superserie con Jalón · descansa 60-90s tras la pareja</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex6" onclick="event.stopPropagation(); toggleInfo('ex6')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex6">
+          Te tumbas boca abajo, con el rodillo apoyado justo encima de los talones. Flexionas la rodilla llevando el rodillo hacia los glúteos, bajas despacio (3 segundos) sin dejar que el peso caiga de golpe.<br>
+          <strong>Peso inicial: 15-20 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -335,7 +405,14 @@
             <div class="ex-detail">Agarre neutro si está disponible</div>
             <div class="ex-note">Superserie con Extensión de cuádriceps · ronda 3</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex7" onclick="event.stopPropagation(); toggleInfo('ex7')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex7">
+          Sentado, espalda pegada al respaldo, agarra las asas a la altura de los hombros. Empuja hacia arriba sin bloquear del todo los codos arriba, baja controlado hasta que los codos queden a la altura de los hombros.<br>
+          <strong>Peso inicial: 10-15 kg por lado.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -351,7 +428,14 @@
             <div class="ex-detail">No bloquees la rodilla arriba · aprieta 1 seg</div>
             <div class="ex-note">Superserie con Press de hombros · descansa 60-90s tras la pareja</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex8" onclick="event.stopPropagation(); toggleInfo('ex8')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex8">
+          Sentado, con la rodilla alineada con el eje de la máquina y el rodillo apoyado en la parte baja de la espinilla. Extiendes la pierna hacia arriba sin bloquear del todo, aprietas un segundo arriba, bajas despacio.<br>
+          <strong>Peso inicial: 15-25 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -367,7 +451,14 @@
             <div class="ex-detail">Espalda recta · aprieta escápulas al final</div>
             <div class="ex-note">Superserie con Hip Thrust / glúteo · ronda 4</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex9" onclick="event.stopPropagation(); toggleInfo('ex9')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex9">
+          Sentado con los pies apoyados en la plataforma, rodillas ligeramente flexionadas, agarras el asa (triangular o barra). Tiras llevando los codos hacia atrás, juntando las escápulas, manteniendo la espalda recta (no te eches hacia atrás con el torso).<br>
+          <strong>Peso inicial: 20-30 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -383,7 +474,14 @@
             <div class="ex-detail">Aprieta glúteo arriba 1 seg antes de bajar</div>
             <div class="ex-note">Superserie con Remo · última ronda</div>
           </div>
-          <div class="ex-prescription">3 × 8-12</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 8-12</div>
+            <button class="info-btn" id="btn_ex10" onclick="event.stopPropagation(); toggleInfo('ex10')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex10">
+          Si es máquina de Hip Thrust: espalda apoyada en el respaldo acolchado, pies en el suelo, empujas la cadera hacia arriba apretando el glúteo, bajas sin que la cadera toque el suelo del todo. Si es máquina de patada de glúteo: de pie, apoyas el pie en la plataforma y empujas hacia atrás.<br>
+          <strong>Peso inicial: 20-30 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -410,7 +508,14 @@
             <div class="ex-detail">Codos fijos pegados al cuerpo</div>
             <div class="ex-note">Circuito de 3 rondas, ritmo ágil, descanso corto</div>
           </div>
-          <div class="ex-prescription">3 × 15</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 15</div>
+            <button class="info-btn" id="btn_ex11" onclick="event.stopPropagation(); toggleInfo('ex11')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex11">
+          De pie frente a la polea alta, agarra la cuerda con ambas manos, codos pegados al cuerpo. Empuja hacia abajo extendiendo el codo, separando ligeramente las manos al final del movimiento.<br>
+          <strong>Peso inicial: 10-15 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -426,7 +531,14 @@
             <div class="ex-detail">Sin balanceo · controla la bajada</div>
             <div class="ex-note">Circuito de 3 rondas</div>
           </div>
-          <div class="ex-prescription">3 × 15</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 15</div>
+            <button class="info-btn" id="btn_ex12" onclick="event.stopPropagation(); toggleInfo('ex12')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex12">
+          De pie frente a la polea baja, agarra la barra o cuerda, codos pegados al cuerpo. Flexiona llevando el peso hacia el pecho sin balancear el torso.<br>
+          <strong>Peso inicial: 10-15 kg.</strong>
         </div>
         <div class="weight-row">
           <span class="weight-label">Peso usado</span>
@@ -441,7 +553,14 @@
             <div class="ex-name">Core (plancha o crunch en máquina)</div>
             <div class="ex-detail">Cierra el circuito de 3 rondas</div>
           </div>
-          <div class="ex-prescription">3 × 40 seg</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 × 40 seg</div>
+            <button class="info-btn" id="btn_ex13" onclick="event.stopPropagation(); toggleInfo('ex13')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex13">
+          <strong>Plancha:</strong> antebrazos y puntas de los pies en el suelo, cuerpo en línea recta de cabeza a talones, aprieta abdomen y glúteo.<br>
+          <strong>Máquina de abdominales:</strong> te sientas, agarras las asas por encima de la cabeza y flexionas el torso hacia adelante contrayendo el abdomen.
         </div>
       </div>
     </div>
@@ -462,7 +581,13 @@
             <div class="ex-name">Bici suave</div>
             <div class="ex-detail">Zona 1-2 · baja el pulso progresivamente</div>
           </div>
-          <div class="ex-prescription">3 min</div>
+          <div class="ex-right">
+            <div class="ex-prescription">3 min</div>
+            <button class="info-btn" id="btn_ex14" onclick="event.stopPropagation(); toggleInfo('ex14')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex14">
+          Pedaleo relajado, bajando pulsaciones de forma progresiva hasta sentirte recuperado.
         </div>
       </div>
       <div class="exercise" id="ex15">
@@ -472,7 +597,13 @@
             <div class="ex-name">Estiramiento final</div>
             <div class="ex-detail">Pecho · espalda · cuád · isquios · 20-30 seg cada uno</div>
           </div>
-          <div class="ex-prescription">2 min</div>
+          <div class="ex-right">
+            <div class="ex-prescription">2 min</div>
+            <button class="info-btn" id="btn_ex15" onclick="event.stopPropagation(); toggleInfo('ex15')">ⓘ</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info_ex15">
+          Mantén cada estiramiento 20-30 segundos sin rebotar, respirando de forma constante: pecho, espalda, cuádriceps e isquiotibiales.
         </div>
       </div>
     </div>
@@ -493,6 +624,11 @@
   function toggle(id) {
     document.getElementById(id).classList.toggle('done');
     updateProgress();
+  }
+
+  function toggleInfo(id) {
+    document.getElementById('info_' + id).classList.toggle('open');
+    document.getElementById('btn_' + id).classList.toggle('open');
   }
 
   function updateProgress() {
