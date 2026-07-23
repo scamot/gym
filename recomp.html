@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Entrenamiento Gym · Recomposición</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #c8f060;
+    --accent-dim: rgba(200,240,96,0.12);
+    --text: #f0f0f0;
+    --muted: #888;
+    --done-bg: #1e1e1e;
+    --done-text: #444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+  }
+  header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .subtitle { font-size: 13px; color: var(--muted); }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-bar {
+    flex: 1; height: 3px;
+    background: var(--border);
+    border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease; width: 0%;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--accent);
+    min-width: 36px; text-align: right;
+  }
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 5px 10px; border-radius: 4px;
+    cursor: pointer; letter-spacing: 0.05em;
+  }
+  .reset-btn:active { opacity: 0.6; }
+
+  .block { border-bottom: 1px solid var(--border); }
+  .block-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 20px 12px;
+  }
+  .block-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 3px;
+  }
+  .tag-warm  { background: rgba(250,238,218,0.1); color: #FAEEDA; }
+  .tag-hiit  { background: rgba(252,235,235,0.1); color: #F7C1C1; }
+  .tag-legs  { background: rgba(230,241,251,0.1); color: #B5D4F4; }
+  .tag-upper { background: rgba(230,241,251,0.1); color: #B5D4F4; }
+  .tag-core  { background: rgba(225,245,238,0.1); color: #9FE1CB; }
+  .block-time {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: var(--muted);
+  }
+  .exercises { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .exercise {
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.2s, opacity 0.2s;
+  }
+  .exercise.done { opacity: 0.45; border-color: transparent; background: var(--done-bg); }
+  .exercise.done .ex-name { color: var(--done-text); text-decoration: line-through; }
+  .exercise.done .ex-detail, .exercise.done .ex-note { color: #333; }
+  .exercise.done .ex-prescription { color: #333; }
+
+  .ex-main {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .ex-main:active { opacity: 0.7; }
+
+  .check {
+    width: 20px; height: 20px; min-width: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .exercise.done .check { background: var(--accent); border-color: var(--accent); }
+  .check-icon { display: none; width: 10px; height: 10px; }
+  .exercise.done .check-icon { display: block; }
+  .check-icon::before {
+    content: '';
+    display: block; width: 10px; height: 10px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-4.5' stroke='%230f0f0f' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+
+  .ex-body { flex: 1; min-width: 0; }
+  .ex-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .ex-detail { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .ex-note { font-size: 11px; color: #666; margin-top: 3px; font-style: italic; line-height: 1.4; }
+  .ex-prescription {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 500;
+    color: var(--accent); white-space: nowrap; margin-top: 2px;
+  }
+
+  /* Weight row */
+  .weight-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 2px;
+  }
+  .weight-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    white-space: nowrap;
+  }
+  .weight-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 6px 10px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .weight-input:focus { border-color: var(--accent); }
+  .weight-input::placeholder { color: #444; }
+  .weight-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+  }
+
+  .tip {
+    margin: 4px 20px 12px;
+    padding: 10px 12px;
+    background: var(--accent-dim);
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    font-size: 12px; color: #aaa; line-height: 1.5;
+  }
+
+  .completed-screen {
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 60px 20px; text-align: center;
+  }
+  .completed-screen.visible { display: flex; }
+  .big-check {
+    width: 64px; height: 64px;
+    background: var(--accent); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; font-size: 28px; color: #0f0f0f;
+  }
+  .completed-screen h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+  .completed-screen p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>Entrenamiento Gym · Recomposición</h1>
+      <div class="subtitle">Life Fitness · ~60 min</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">RESET</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0/15</div>
+  </div>
+</header>
+
+<div id="mainContent">
+
+  <!-- BLOQUE 1 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-warm">Calentamiento</span>
+      <span class="block-time">7 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" id="ex1">
+        <div class="ex-main" onclick="toggle('ex1')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Cardio suave</div>
+            <div class="ex-detail">Bici o elíptica · sube el pulso de forma gradual</div>
+          </div>
+          <div class="ex-prescription">5 min</div>
+        </div>
+      </div>
+      <div class="exercise" id="ex2">
+        <div class="ex-main" onclick="toggle('ex2')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Movilidad dinámica</div>
+            <div class="ex-detail">Círculos de cadera y hombro · sentadilla profunda</div>
+          </div>
+          <div class="ex-prescription">2 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-legs">Fuerza · superseries</span>
+      <span class="block-time">35 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" id="ex3">
+        <div class="ex-main" onclick="toggle('ex3')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Leg Press o Hack Squat</div>
+            <div class="ex-detail">Recorrido completo · controla la bajada</div>
+            <div class="ex-note">Superserie con Chest Press · ronda 1</div>
+          </div>
+          <div class="ex-prescription">4 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex3" onchange="saveWeight('ex3', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex4">
+        <div class="ex-main" onclick="toggle('ex4')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Chest Press</div>
+            <div class="ex-detail">Escápulas retraídas · no bloquees el codo del todo</div>
+            <div class="ex-note">Superserie con Leg Press · descansa 60-90s tras la pareja</div>
+          </div>
+          <div class="ex-prescription">4 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex4" onchange="saveWeight('ex4', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex5">
+        <div class="ex-main" onclick="toggle('ex5')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Jalón al pecho (Lat Pulldown)</div>
+            <div class="ex-detail">Tira con la espalda, no con los brazos</div>
+            <div class="ex-note">Superserie con Curl femoral · ronda 2</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex5" onchange="saveWeight('ex5', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex6">
+        <div class="ex-main" onclick="toggle('ex6')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Curl femoral tumbado</div>
+            <div class="ex-detail">Bajada lenta 3 seg · subida controlada</div>
+            <div class="ex-note">Superserie con Jalón · descansa 60-90s tras la pareja</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex6" onchange="saveWeight('ex6', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex7">
+        <div class="ex-main" onclick="toggle('ex7')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Press de hombros en máquina</div>
+            <div class="ex-detail">Agarre neutro si está disponible</div>
+            <div class="ex-note">Superserie con Extensión de cuádriceps · ronda 3</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex7" onchange="saveWeight('ex7', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex8">
+        <div class="ex-main" onclick="toggle('ex8')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Extensión de cuádriceps</div>
+            <div class="ex-detail">No bloquees la rodilla arriba · aprieta 1 seg</div>
+            <div class="ex-note">Superserie con Press de hombros · descansa 60-90s tras la pareja</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex8" onchange="saveWeight('ex8', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex9">
+        <div class="ex-main" onclick="toggle('ex9')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Remo sentado en polea</div>
+            <div class="ex-detail">Espalda recta · aprieta escápulas al final</div>
+            <div class="ex-note">Superserie con Hip Thrust / glúteo · ronda 4</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex9" onchange="saveWeight('ex9', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex10">
+        <div class="ex-main" onclick="toggle('ex10')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Hip Thrust o máquina de glúteo</div>
+            <div class="ex-detail">Aprieta glúteo arriba 1 seg antes de bajar</div>
+            <div class="ex-note">Superserie con Remo · última ronda</div>
+          </div>
+          <div class="ex-prescription">3 × 8-12</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex10" onchange="saveWeight('ex10', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip">4 rondas por pareja de ejercicios, 8-12 reps. Sube el peso cuando llegues a 12 reps con buena forma en las 4 rondas.</div>
+  </div>
+
+  <!-- BLOQUE 3 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-hiit">Metabólico</span>
+      <span class="block-time">10 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" id="ex11">
+        <div class="ex-main" onclick="toggle('ex11')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Extensión de tríceps en polea (cuerda)</div>
+            <div class="ex-detail">Codos fijos pegados al cuerpo</div>
+            <div class="ex-note">Circuito de 3 rondas, ritmo ágil, descanso corto</div>
+          </div>
+          <div class="ex-prescription">3 × 15</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex11" onchange="saveWeight('ex11', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex12">
+        <div class="ex-main" onclick="toggle('ex12')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Curl de bíceps en polea</div>
+            <div class="ex-detail">Sin balanceo · controla la bajada</div>
+            <div class="ex-note">Circuito de 3 rondas</div>
+          </div>
+          <div class="ex-prescription">3 × 15</div>
+        </div>
+        <div class="weight-row">
+          <span class="weight-label">Peso usado</span>
+          <input class="weight-input" type="number" inputmode="decimal" placeholder="—" id="w_ex12" onchange="saveWeight('ex12', this.value)">
+          <span class="weight-unit">kg</span>
+        </div>
+      </div>
+      <div class="exercise" id="ex13">
+        <div class="ex-main" onclick="toggle('ex13')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Core (plancha o crunch en máquina)</div>
+            <div class="ex-detail">Cierra el circuito de 3 rondas</div>
+          </div>
+          <div class="ex-prescription">3 × 40 seg</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip">Ritmo ágil y descansos cortos entre ejercicios: mantiene la frecuencia cardíaca alta y suma al gasto calórico total.</div>
+  </div>
+
+  <!-- BLOQUE 4 -->
+  <div class="block">
+    <div class="block-header">
+      <span class="block-tag tag-core">Vuelta a la calma</span>
+      <span class="block-time">5 min</span>
+    </div>
+    <div class="exercises">
+      <div class="exercise" id="ex14">
+        <div class="ex-main" onclick="toggle('ex14')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Bici suave</div>
+            <div class="ex-detail">Zona 1-2 · baja el pulso progresivamente</div>
+          </div>
+          <div class="ex-prescription">3 min</div>
+        </div>
+      </div>
+      <div class="exercise" id="ex15">
+        <div class="ex-main" onclick="toggle('ex15')">
+          <div class="check"><span class="check-icon"></span></div>
+          <div class="ex-body">
+            <div class="ex-name">Estiramiento final</div>
+            <div class="ex-detail">Pecho · espalda · cuád · isquios · 20-30 seg cada uno</div>
+          </div>
+          <div class="ex-prescription">2 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completed-screen" id="completedScreen">
+    <div class="big-check">✓</div>
+    <h2>Sesión completada</h2>
+    <p>Buen trabajo. Recuerda hidratarte<br>y comer proteína en los próximos 30-60 min.</p>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL = 15;
+  const WEIGHT_IDS = ['ex3','ex4','ex5','ex6','ex7','ex8','ex9','ex10','ex11','ex12'];
+
+  function toggle(id) {
+    document.getElementById(id).classList.toggle('done');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const done = document.querySelectorAll('.exercise.done').length;
+    const pct = Math.round((done / TOTAL) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = done + '/' + TOTAL;
+    if (done === TOTAL) {
+      setTimeout(() => {
+        document.getElementById('completedScreen').classList.add('visible');
+        document.getElementById('completedScreen').scrollIntoView({ behavior: 'smooth' });
+      }, 400);
+    } else {
+      document.getElementById('completedScreen').classList.remove('visible');
+    }
+  }
+
+  function saveWeight(id, val) {
+    localStorage.setItem('recomp_weight_' + id, val);
+  }
+
+  function loadWeights() {
+    WEIGHT_IDS.forEach(id => {
+      const val = localStorage.getItem('recomp_weight_' + id);
+      if (val) {
+        const input = document.getElementById('w_' + id);
+        if (input) input.value = val;
+      }
+    });
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.exercise.done').forEach(el => el.classList.remove('done'));
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  loadWeights();
+</script>
+</body>
+</html>
